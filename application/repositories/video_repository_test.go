@@ -28,7 +28,6 @@ func TestVideoRepositoryDbInsert(t *testing.T) {
 
 	repo := repositories.NewVideoRepository(db)
 	_, err2 := repo.Insert(video)
-
 	require.Nil(t, err2)
 
 	v, err := repo.Find(video.ID)
