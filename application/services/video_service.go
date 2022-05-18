@@ -81,14 +81,57 @@ func (v *VideoService) Fragment() error {
 
 	source := fmt.Sprintf("%s/%s.mp4", os.Getenv("LOCAL_STORAGE_PATH"), v.Video.ID)
 	target := fmt.Sprintf("%s/%s.frag", os.Getenv("LOCAL_STORAGE_PATH"), v.Video.ID)
-
-	cmd := exec.Command("./mp4fragment", source, target)
+	cmd := exec.Command("mp4fragment", source, target)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return err
 	}
 	printOutput(output)
 
+	return nil
+}
+
+func (v *VideoService) Encode() error {
+	cmdArgs := []string{}
+
+	cmdArgs = append(cmdArgs, os.Getenv("LOCAL_STORAGE_PATH")+"/"+v.Video.ID+".frag")
+	cmdArgs = append(cmdArgs, "--use-segment-timeline")
+	cmdArgs = append(cmdArgs, "-o")
+	cmdArgs = append(cmdArgs, os.Getenv("LOCAL_STORAGE_PATH")+"/"+v.Video.ID)
+	cmdArgs = append(cmdArgs, "-f")
+	cmdArgs = append(cmdArgs, "--exec-dir")
+	cmdArgs = append(cmdArgs, os.Getenv("HOME")+"/.local/bin/")
+
+	cmd := exec.Command("mp4dash", cmdArgs...)
+
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		return err
+	}
+	printOutput(output)
+
+	return nil
+}
+
+func (v *VideoService) Finish() error {
+	err := os.Remove(fmt.Sprintf("%s/%s.mp4", os.Getenv("LOCAL_STORAGE_PATH"), v.Video.ID))
+	if err != nil {
+		log.Println("error removing mp4", v.Video.ID, ".mp4")
+		return err
+	}
+	err = os.Remove(fmt.Sprintf("%s/%s.frag", os.Getenv("LOCAL_STORAGE_PATH"), v.Video.ID))
+	if err != nil {
+		log.Println("error removing frag", v.Video.ID, ".frag")
+		return err
+	}
+	err = os.RemoveAll(fmt.Sprintf("%s/%s", os.Getenv("LOCAL_STORAGE_PATH"), v.Video.ID))
+	if err != nil {
+		log.Println("error removing dir", v.Video.ID)
+		return err
+	}
+
+	log.Println("files have been removed: ", v.Video.ID)
 	return nil
 }
 

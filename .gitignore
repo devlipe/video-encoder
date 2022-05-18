@@ -1,3 +1,4 @@
 .idea
 .vscode
 /bucket-credential.json
+.env

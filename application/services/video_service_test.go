@@ -49,10 +49,18 @@ func TestVideoService_Download(t *testing.T) {
 	videoService.VideoRepository = repo
 
 	err := videoService.Download("encoder-bucket-go")
-
+	fmt.Println(err.Error())
 	require.Nil(t, err)
 
 	err = videoService.Fragment()
+	fmt.Println(err.Error())
+	require.Nil(t, err)
 
+	err = videoService.Encode()
+	fmt.Println(err.Error())
+	require.Nil(t, err)
+
+	err = videoService.Finish()
+	fmt.Println(err.Error())
 	require.Nil(t, err)
 }
